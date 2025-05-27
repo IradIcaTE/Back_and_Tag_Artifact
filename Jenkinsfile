@@ -1,14 +1,14 @@
 pipeline {
-    agent {label "First"}
+    agent any
 
     parameters {
-        booleanParam(name: 'ENABLE_BACKUP', defaultValue: 'true', description: 'Enable backup before tagging?')
+        booleanParam(name: 'ENABLE_BACKUP', defaultValue: true, description: 'Enable backup before tagging?')
         choice(name: 'TAG_TYPE', choices: ['dev', 'staging', 'prod'], description: 'Choose the tag type')
     }
 
     environment {
-        BUILD_ID = "build-${TAG-TYPE}-${new Date().format('yyyyMMdd-HHmmss)}"
-        ARTIFACTS_DIR = "${env.WORKSPACE/artifacts}"
+        BUILD_TAG = "build-${TAG_TYPE}-${new Date().format('yyyyMMdd-HHmmss')}"
+        ARTIFACTS_DIR = "${env.WORKSPACE}/artifacts"
     }
 
     stages {
@@ -17,13 +17,13 @@ pipeline {
                 script {
                     sh '''
                         mkdir -p ${ARTIFACTS_DIR}
-                        echo "Sample Artifact - $(date)" > ${ARTIFACT_DIR}/artifact.txt
+                        echo "Sample Artifact - $(date)" > ${ARTIFACTS_DIR}/artifact.txt
                     '''
                 }
             }
         }
 
-        stage ('Backup Artifcats') {
+        stage('Backup Artifacts') {
             when {
                 expression { params.ENABLE_BACKUP }
             }
@@ -37,10 +37,10 @@ pipeline {
         }
 
         stage('Tag Build') {
-            steos {
+            steps {
                 echo "Tagging build with: ${BUILD_TAG}"
                 sh '''
-                    echo "${BUILD_TAG} > ${ARTIFACTS_DIR/tag.txt}
+                    echo "${BUILD_TAG}" > ${ARTIFACTS_DIR}/tag.txt
                 '''
             }
         }
